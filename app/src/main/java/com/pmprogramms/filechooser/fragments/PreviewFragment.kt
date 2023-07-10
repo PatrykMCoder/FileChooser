@@ -2,6 +2,7 @@ package com.pmprogramms.filechooser.fragments
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +14,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.pmprogramms.filechooser.R
-import com.pmprogramms.filechooser.callbacks.OnClickImageItemCallback
+import com.pmprogramms.filechooser.callbacks.OnClickItemCallback
 import com.pmprogramms.filechooser.enums.FileType
 import com.pmprogramms.filechooser.files.File
 import com.pmprogramms.filechooser.recycler.SelectedFilesRecyclerViewAdapter
@@ -29,8 +30,8 @@ class PreviewFragment : Fragment() {
     private lateinit var videoView: VideoView
     private lateinit var selectedFilesRecyclerAdapter: SelectedFilesRecyclerViewAdapter
 
-    private val callbackClickImageItem = object : OnClickImageItemCallback {
-        override fun onChangeImage(position: Int) {
+    private val callbackClickImageItem = object : OnClickItemCallback {
+        override fun onChangeFile(position: Int) {
             selectedFiles.map { element -> element.show = false}
             selectedFiles[position].show = true
             val uri = Uri.parse(selectedFiles[position].path)
@@ -50,7 +51,7 @@ class PreviewFragment : Fragment() {
             selectedFilesRecyclerAdapter.notifyDataSetChanged()
         }
 
-        override fun onDeleteImage(position: Int) {
+        override fun onDeleteFile(position: Int) {
             val show = selectedFiles[position].show
 
             selectedFiles.removeAt(position)
@@ -63,12 +64,16 @@ class PreviewFragment : Fragment() {
 
                 val uri = Uri.parse(selectedFiles[0].path)
 
-                if (fileType == FileType.IMAGES.name) {
-                   setupImages(uri)
-                } else if (fileType == FileType.VIDEOS.name) {
-                    setupVideos(uri)
-                } else {
-                    throw IllegalArgumentException("Wrong file type")
+                when (fileType) {
+                    FileType.IMAGES.name -> {
+                        setupImages(uri)
+                    }
+                    FileType.VIDEOS.name -> {
+                        setupVideos(uri)
+                    }
+                    else -> {
+                        throw IllegalArgumentException("Wrong file type")
+                    }
                 }
             }
 
@@ -103,14 +108,19 @@ class PreviewFragment : Fragment() {
         videoView.setMediaController(mediaController)
 
         val uri = Uri.parse(selectedFiles[0].path)
-        if (fileType == FileType.IMAGES.type) {
-            imageView.visibility = View.VISIBLE
-            setupImages(uri)
-        } else if (fileType == FileType.VIDEOS.type) {
-            videoView.visibility = View.VISIBLE
-            setupVideos(uri)
-        } else {
-            throw IllegalArgumentException("Wrong file type")
+
+        when (fileType) {
+            FileType.IMAGES.type -> {
+                imageView.visibility = View.VISIBLE
+                setupImages(uri)
+            }
+            FileType.VIDEOS.type -> {
+                videoView.visibility = View.VISIBLE
+                setupVideos(uri)
+            }
+            else -> {
+                throw IllegalArgumentException("Wrong file type")
+            }
         }
 
         selectedFiles[0].show = true
@@ -126,12 +136,10 @@ class PreviewFragment : Fragment() {
     }
 
     private fun setupImages(uri: Uri) {
-        imageView.visibility = View.VISIBLE
         imageView.setImageURI(uri)
     }
 
     private fun setupVideos(uri: Uri) {
-        videoView.visibility = View.VISIBLE
         videoView.setVideoURI(uri)
     }
 }

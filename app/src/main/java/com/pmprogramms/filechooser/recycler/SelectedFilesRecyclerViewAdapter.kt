@@ -9,13 +9,13 @@ import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.pmprogramms.filechooser.R
-import com.pmprogramms.filechooser.callbacks.OnClickImageItemCallback
+import com.pmprogramms.filechooser.callbacks.OnClickItemCallback
+import com.pmprogramms.filechooser.enums.FileType
 import com.pmprogramms.filechooser.files.File
-import com.pmprogramms.filechooser.fragments.PreviewFragment
 
 class SelectedFilesRecyclerViewAdapter : RecyclerView.Adapter<SelectedFilesRecyclerViewAdapter.MyViewHolder>(){
     private lateinit var data: List<File>
-    private lateinit var onClickImageItemCallback: OnClickImageItemCallback
+    private lateinit var onClickItemCallback: OnClickItemCallback
     private var oldImageSelectedPosition = 0
 
     inner class MyViewHolder(v: View) : ViewHolder(v) {
@@ -29,16 +29,24 @@ class SelectedFilesRecyclerViewAdapter : RecyclerView.Adapter<SelectedFilesRecyc
                 showIconImageView.visibility = View.INVISIBLE
             }
 
-            val uri = Uri.parse(file.path)
-            imageView.setImageURI(uri)
+            when (file.type) {
+                FileType.VIDEOS.type -> {
+                    imageView.setImageBitmap(file.thumbnail)
+                }
+                FileType.IMAGES.type -> {
+                    val uri = Uri.parse(file.path)
+                    imageView.setImageURI(uri)
+                }
+            }
+
 
             imageView.setOnClickListener {
-                onClickImageItemCallback.onChangeImage(adapterPosition)
+                onClickItemCallback.onChangeFile(adapterPosition)
                 oldImageSelectedPosition = adapterPosition
             }
 
             imageView.setOnLongClickListener {
-                onClickImageItemCallback.onDeleteImage(adapterPosition)
+                onClickItemCallback.onDeleteFile(adapterPosition)
                 return@setOnLongClickListener true
             }
         }
@@ -65,7 +73,7 @@ class SelectedFilesRecyclerViewAdapter : RecyclerView.Adapter<SelectedFilesRecyc
         this.data = data
     }
 
-    fun setOnClickImageItemCallback(onClickImageItemCallback: OnClickImageItemCallback) {
-        this.onClickImageItemCallback = onClickImageItemCallback
+    fun setOnClickImageItemCallback(onClickItemCallback: OnClickItemCallback) {
+        this.onClickItemCallback = onClickItemCallback
     }
 }
